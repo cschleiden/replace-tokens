@@ -1424,7 +1424,7 @@ function run() {
                 throw new Error("`files` needs to be a string or an array");
             }
             const result = yield replace_1.replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
-            core.debug(`Replaced tokens in files: ${result}`);
+            console.log(`Replaced tokens in files: ${result}`);
         }
         catch (error) {
             core.setFailed(error.message);

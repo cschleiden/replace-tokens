@@ -14,7 +14,7 @@ async function run() {
 
     const result = await replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
 
-    core.debug(`Replaced tokens in files: ${result}`)
+    console.log(`Replaced tokens in files: ${result}`)
   } catch (error) {
     core.setFailed(error.message);
   }
