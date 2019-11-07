@@ -1412,17 +1412,21 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const replace_1 = __webpack_require__(364);
+function getFiles() {
+    const files = core.getInput("files", {
+        required: true
+    }) || "";
+    if (files.trim().startsWith("[")) {
+        return JSON.parse(files);
+    }
+    return [files];
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const tokenPrefix = core.getInput("tokenPrefix") || "#{";
             const tokenSuffix = core.getInput("tokenSuffix") || "}#";
-            const files = JSON.parse(core.getInput("files", {
-                required: true
-            }));
-            if (typeof files !== "string" && !Array.isArray(files)) {
-                throw new Error("`files` needs to be a string or an array");
-            }
+            const files = getFiles();
             const result = yield replace_1.replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
             console.log(`Replaced tokens in files: ${result}`);
         }
