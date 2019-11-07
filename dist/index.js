@@ -1412,8 +1412,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const replace_1 = __webpack_require__(364);
+const process = __importStar(__webpack_require__(765));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(process.cwd());
         try {
             const tokenPrefix = core.getInput("tokenPrefix") || "#{";
             const tokenSuffix = core.getInput("tokenPrefix") || "}#";
@@ -2702,27 +2704,20 @@ function replaceTokens(tokenPrefix, tokenSuffix, files) {
     return __awaiter(this, void 0, void 0, function* () {
         const fromRegEx = new RegExp(`${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`, "gm");
         const matchRegEx = new RegExp(`${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`);
-        try {
-            const result = yield replace_in_file_1.default({
-                files,
-                from: fromRegEx,
-                to: (match) => {
-                    const m = match.match(matchRegEx);
-                    if (m) {
-                        const tokenName = m[1];
-                        return process.env[tokenName] || "";
-                    }
-                    return "";
+        const result = yield replace_in_file_1.default({
+            files,
+            allowEmptyPaths: true,
+            from: fromRegEx,
+            to: (match) => {
+                const m = match.match(matchRegEx);
+                if (m) {
+                    const tokenName = m[1];
+                    return process.env[tokenName] || "";
                 }
-            });
-            return result.filter(r => r.hasChanged).map(r => r.file);
-        }
-        catch (e) {
-            if (e.message.startsWith("No files match")) {
-                return [];
+                return "";
             }
-            throw e;
-        }
+        });
+        return result.filter(r => r.hasChanged).map(r => r.file);
     });
 }
 exports.replaceTokens = replaceTokens;
@@ -5305,6 +5300,13 @@ module.exports = function makeReplacements(contents, from, to, file, count) {
   return [result, newContents];
 };
 
+
+/***/ }),
+
+/***/ 765:
+/***/ (function(module) {
+
+module.exports = require("process");
 
 /***/ }),
 

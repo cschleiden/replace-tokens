@@ -1,7 +1,9 @@
 import * as core from '@actions/core';
 import { replaceTokens } from "./replace";
+import * as process from "process";
 
 async function run() {
+  console.log(process.cwd());
   try {
     const tokenPrefix = core.getInput("tokenPrefix") || "#{";
     const tokenSuffix = core.getInput("tokenPrefix") || "}#";
