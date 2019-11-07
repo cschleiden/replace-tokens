@@ -40,4 +40,26 @@ describe("basic functionality", () => {
         const content = await fs.readFile('test2.txt', 'utf8');
         expect(content).toBe("hallo welt")
     });
+
+    test("returns list of changed files", async () => {
+        const result = await replaceTokens("#{", "}#", ["*.txt"]);
+
+        expect(result).toEqual([
+            "test.txt", "test2.txt"
+        ]);
+    });
+
+    test("returns only list of changed files", async () => {
+        const result = await replaceTokens("#{", "}#", ["test.txt"]);
+
+        expect(result).toEqual([
+            "test.txt"
+        ]);
+    });
+
+    test("does not throw when no match", async () => {
+        const result = await replaceTokens("#{", "}#", [""]);
+
+        expect(result).toEqual([]);
+    });
 });

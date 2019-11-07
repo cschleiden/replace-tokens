@@ -1423,7 +1423,8 @@ function run() {
             if (typeof files !== "string" && !Array.isArray(files)) {
                 throw new Error("`files` needs to be a string or an array");
             }
-            yield replace_1.replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
+            const result = yield replace_1.replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
+            core.debug(`Replaced tokens in files: ${result}`);
         }
         catch (error) {
             core.setFailed(error.message);
@@ -2701,18 +2702,27 @@ function replaceTokens(tokenPrefix, tokenSuffix, files) {
     return __awaiter(this, void 0, void 0, function* () {
         const fromRegEx = new RegExp(`${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`, "gm");
         const matchRegEx = new RegExp(`${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`);
-        yield replace_in_file_1.default({
-            files,
-            from: fromRegEx,
-            to: (match) => {
-                const m = match.match(matchRegEx);
-                if (m) {
-                    const tokenName = m[1];
-                    return process.env[tokenName] || "";
+        try {
+            const result = yield replace_in_file_1.default({
+                files,
+                from: fromRegEx,
+                to: (match) => {
+                    const m = match.match(matchRegEx);
+                    if (m) {
+                        const tokenName = m[1];
+                        return process.env[tokenName] || "";
+                    }
+                    return "";
                 }
-                return "";
+            });
+            return result.filter(r => r.hasChanged).map(r => r.file);
+        }
+        catch (e) {
+            if (e.message.startsWith("No files match")) {
+                return [];
             }
-        });
+            throw e;
+        }
     });
 }
 exports.replaceTokens = replaceTokens;

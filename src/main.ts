@@ -12,7 +12,9 @@ async function run() {
       throw new Error("`files` needs to be a string or an array")
     }
 
-    await replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
+    const result = await replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
+
+    core.debug(`Replaced tokens in files: ${result}`)
   } catch (error) {
     core.setFailed(error.message);
   }
