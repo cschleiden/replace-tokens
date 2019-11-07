@@ -1412,19 +1412,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const replace_1 = __webpack_require__(364);
-const process = __importStar(__webpack_require__(765));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const tokenPrefix = core.getInput("tokenPrefix") || "#{";
-            const tokenSuffix = core.getInput("tokenPrefix") || "}#";
+            const tokenSuffix = core.getInput("tokenSuffix") || "}#";
             const files = JSON.parse(core.getInput("files", {
                 required: true
             }));
             if (typeof files !== "string" && !Array.isArray(files)) {
                 throw new Error("`files` needs to be a string or an array");
             }
-            console.log(process.cwd(), tokenPrefix, tokenSuffix, files);
             const result = yield replace_1.replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
             console.log(`Replaced tokens in files: ${result}`);
         }
@@ -2717,7 +2715,6 @@ function replaceTokens(tokenPrefix, tokenSuffix, files) {
                 return "";
             }
         });
-        console.log(result);
         return result.filter(r => r.hasChanged).map(r => r.file);
     });
 }
@@ -5301,13 +5298,6 @@ module.exports = function makeReplacements(contents, from, to, file, count) {
   return [result, newContents];
 };
 
-
-/***/ }),
-
-/***/ 765:
-/***/ (function(module) {
-
-module.exports = require("process");
 
 /***/ }),
 

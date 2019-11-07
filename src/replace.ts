@@ -19,8 +19,6 @@ export async function replaceTokens(tokenPrefix: string, tokenSuffix: string, fi
     }
   });
 
-  console.log(result);
-
   return result.filter(r => r.hasChanged).map(r => r.file);
 }
 
