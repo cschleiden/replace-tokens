@@ -1,16 +1,18 @@
 import * as core from '@actions/core';
-import {wait} from './wait'
+import { replaceTokens } from "./replace";
 
 async function run() {
   try {
-    const ms = core.getInput('milliseconds');
-    console.log(`Waiting ${ms} milliseconds ...`)
+    const tokenPrefix = core.getInput("tokenPrefix") || "#{";
+    const tokenSuffix = core.getInput("tokenPrefix") || "}#";
+    const files = JSON.parse(core.getInput("files", {
+      required: true
+    }));
+    if (typeof files !== "string" && !Array.isArray(files)) {
+      throw new Error("`files` needs to be a string or an array")
+    }
 
-    core.debug((new Date()).toTimeString())
-    await wait(parseInt(ms, 10));
-    core.debug((new Date()).toTimeString())
-
-    core.setOutput('time', new Date().toTimeString());
+    await replaceTokens(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
   } catch (error) {
     core.setFailed(error.message);
   }

@@ -1,27 +1,43 @@
-import {wait} from '../src/wait'
+import { promises as fs } from "fs";
 import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
+import { replaceTokens } from "../src/replace";
 
-test('throws invalid number', async() => {
-    const input = parseInt('foo', 10);
-    await expect(wait(input)).rejects.toThrow('milleseconds not a number');
-});
+describe("basic functionality", () => {
+    beforeEach(async () => {
+        await fs.writeFile("test.txt", "hello #{ACTOR}#", "utf8");
+        await fs.writeFile("test2.txt", "#{GREETING}# #{ACTOR}#", "utf8");
+    })
 
-test('wait 500 ms', async() => {
-    const start = new Date();
-    await wait(500);
-    const end = new Date();
-    var delta = Math.abs(end.getTime() - start.getTime());
-    expect(delta).toBeGreaterThan(450);
-});
+    afterEach(async () => {
+        await fs.unlink("test.txt");
+        await fs.unlink("test2.txt");
+    })
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-    process.env['INPUT_MILLISECONDS'] = '500';
-    const ip = path.join(__dirname, '..', 'lib', 'main.js');
-    const options: cp.ExecSyncOptions = {
-        env: process.env
-    };
-    console.log(cp.execSync(`node ${ip}`, options).toString());
+    test("replaces single token in file", async () => {
+        process.env["ACTOR"] = "world";
+        await replaceTokens("#{", "}#", ["test.txt"]);
+
+        const content = await fs.readFile('test.txt', 'utf8');
+        expect(content).toBe("hello world")
+    });
+
+    test("replaces single token in file specified with glob", async () => {
+        process.env["ACTOR"] = "world";
+        await replaceTokens("#{", "}#", ["*.txt"]);
+
+        const content = await fs.readFile('test.txt', 'utf8');
+        expect(content).toBe("hello world")
+
+        const content2 = await fs.readFile('test2.txt', 'utf8');
+        expect(content2).toBe(" world")
+    });
+
+    test("replaces multiple token in file", async () => {
+        process.env["GREETING"] = "hallo";
+        process.env["ACTOR"] = "welt";
+        await replaceTokens("#{", "}#", ["test2.txt"]);
+
+        const content = await fs.readFile('test2.txt', 'utf8');
+        expect(content).toBe("hallo welt")
+    });
 });

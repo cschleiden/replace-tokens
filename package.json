@@ -1,12 +1,13 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
+  "name": "replace-tokens-action",
+  "version": "1.0.0",
   "private": true,
-  "description": "TypeScript template action",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "watch": "tsc --watch",
+    "test": "jest --runInBand",
+    "test-watch": "jest --watch --runInBand"
   },
   "repository": {
     "type": "git",
@@ -17,10 +18,11 @@
     "node",
     "setup"
   ],
-  "author": "YourNameOrOrganization",
+  "author": "cschleiden",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.0.0"
+    "@actions/core": "^1.0.0",
+    "replace-in-file": "^4.2.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",
