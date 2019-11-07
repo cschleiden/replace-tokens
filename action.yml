@@ -1,4 +1,4 @@
-name: "cschleiden"
+name: "Replace tokens"
 description: "Replace tokens in files"
 author: "cschleiden"
 inputs:
