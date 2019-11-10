@@ -2,7 +2,7 @@
   "name": "replace-tokens-action",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/main.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/cschleiden/replace-tokens.git"
   },
   "keywords": [
     "actions",
