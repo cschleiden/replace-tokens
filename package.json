@@ -22,7 +22,7 @@
   "author": "cschleiden",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.0.0",
+    "@actions/core": "^1.2.6",
     "replace-in-file": "^4.2.0"
   },
   "devDependencies": {
