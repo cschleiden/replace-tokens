@@ -1413,9 +1413,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const replace_1 = __webpack_require__(364);
 function getFiles() {
-    const files = core.getInput("files", {
-        required: true
+    let files = core.getInput("files", {
+        required: true,
     }) || "";
+    files = files.replace("\\", "\\\\");
     if (files.trim().startsWith("[")) {
         return JSON.parse(files);
     }
@@ -2710,7 +2711,7 @@ function replaceTokens(tokenPrefix, tokenSuffix, files) {
             files,
             allowEmptyPaths: true,
             from: fromRegEx,
-            to: (match) => {
+            to: match => {
                 const m = match.match(matchRegEx);
                 if (m) {
                     const tokenName = m[1];
@@ -2724,7 +2725,7 @@ function replaceTokens(tokenPrefix, tokenSuffix, files) {
 }
 exports.replaceTokens = replaceTokens;
 function escapeDelimiter(delimiter) {
-    return delimiter.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    return delimiter.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
 
 

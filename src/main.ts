@@ -2,11 +2,11 @@ import * as core from "@actions/core";
 import { replaceTokens } from "./replace";
 
 function getFiles(): string[] {
-  const files =
+  let files =
     core.getInput("files", {
-      required: true
+      required: true,
     }) || "";
-  files = files.replace("\\","\\\\");
+  files = files.replace("\\", "\\\\");
   if (files.trim().startsWith("[")) {
     return JSON.parse(files);
   }
