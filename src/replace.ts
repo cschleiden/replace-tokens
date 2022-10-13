@@ -1,4 +1,4 @@
-import replace from "replace-in-file";
+import { replaceInFile } from "replace-in-file";
 
 export async function replaceTokens(
   tokenPrefix: string,
@@ -13,11 +13,11 @@ export async function replaceTokens(
     `${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`
   );
 
-  const result = await replace({
+  const result = await replaceInFile({
     files,
     allowEmptyPaths: true,
     from: fromRegEx,
-    to: match => {
+    to: (match: string) => {
       const m = match.match(matchRegEx);
       if (m) {
         const tokenName = m[1];
