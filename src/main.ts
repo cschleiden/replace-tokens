@@ -26,7 +26,11 @@ async function run() {
     );
     console.log(`Replaced tokens in files: ${result}`);
   } catch (error) {
-    core.setFailed(error.message);
+    if (error instanceof Error) {
+      core.setFailed(error.message);
+    } else {
+      core.setFailed(String(error));
+    }
   }
 }
 
