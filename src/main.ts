@@ -16,8 +16,8 @@ function getFiles(): string[] {
 
 async function run() {
   try {
-    const tokenPrefix = core.getInput("tokenPrefix") || "#{";
-    const tokenSuffix = core.getInput("tokenSuffix") || "}#";
+    const tokenPrefix = core.getInput("tokenPrefix") ?? "#{";
+    const tokenSuffix = core.getInput("tokenSuffix") ?? "}#";
     const files = getFiles();
     const result = await replaceTokens(
       tokenPrefix,
