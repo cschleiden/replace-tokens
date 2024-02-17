@@ -6,7 +6,7 @@ function getFiles(): string[] {
     core.getInput("files", {
       required: true,
     }) || "";
-  files = files.replace("\\", "\\\\");
+  files = files.replace(/\\/g, "\\\\");
   if (files.trim().startsWith("[")) {
     return JSON.parse(files);
   }
