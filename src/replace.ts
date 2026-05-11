@@ -1,9 +1,14 @@
+import * as core from "@actions/core";
 import { replaceInFile } from "replace-in-file";
+import { MissingVarLog } from "./missingVarLog";
 
 export async function replaceTokens(
   tokenPrefix: string,
   tokenSuffix: string,
-  files: string[]
+  files: string[],
+  missingVarDefault: string,
+  missingVarLog: MissingVarLog,
+  additionalVariables: any
 ) {
   const fromRegEx = new RegExp(
     `${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`,
@@ -13,6 +18,10 @@ export async function replaceTokens(
     `${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`
   );
 
+  const getVariable = (tokenName: string): string | undefined => {
+    return additionalVariables[tokenName] ?? process.env[tokenName]
+  }
+
   const result = await replaceInFile({
     files,
     allowEmptyPaths: true,
@@ -21,10 +30,19 @@ export async function replaceTokens(
       const m = match.match(matchRegEx);
       if (m) {
         const tokenName = m[1];
-        return process.env[tokenName] || "";
+        const value = getVariable(tokenName);
+        if (!!value) {
+          return value;
+        }
+
+        if (missingVarLog === MissingVarLog.Error) {
+          core.error(`Variable not found: ${tokenName}`);
+        } else if (missingVarLog == MissingVarLog.Warn) {
+          core.warning(`Variable not found: ${tokenName}`);
+        }
       }
 
-      return "";
+      return missingVarDefault;
     }
   });
 

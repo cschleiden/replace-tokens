@@ -8711,6 +8711,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const replace_1 = __nccwpck_require__(5287);
+const missingVarLog_1 = __nccwpck_require__(1367);
 function getFiles() {
     let files = core.getInput("files", {
         required: true,
@@ -8721,13 +8722,20 @@ function getFiles() {
     }
     return [files];
 }
+function getMissingVarLog() {
+    const value = core.getInput("missingVarLog");
+    return Object.values(missingVarLog_1.MissingVarLog).includes(value) ? value : missingVarLog_1.MissingVarLog.Off;
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const tokenPrefix = core.getInput("tokenPrefix") || "#{";
             const tokenSuffix = core.getInput("tokenSuffix") || "}#";
             const files = getFiles();
-            const result = yield (0, replace_1.replaceTokens)(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files]);
+            const missingVarDefault = core.getInput("missingVarDefault") || "";
+            const missingVarLog = getMissingVarLog();
+            const additionalVariables = JSON.parse(core.getInput("additionalVariables") || "{}");
+            const result = yield (0, replace_1.replaceTokens)(tokenPrefix, tokenSuffix, Array.isArray(files) ? files : [files], missingVarDefault, missingVarLog, additionalVariables);
             console.log(`Replaced tokens in files: ${result}`);
         }
         catch (error) {
@@ -8741,11 +8749,51 @@ run();
 
 /***/ }),
 
+/***/ 1367:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MissingVarLog = void 0;
+var MissingVarLog;
+(function (MissingVarLog) {
+    MissingVarLog["Off"] = "off";
+    MissingVarLog["Warn"] = "warn";
+    MissingVarLog["Error"] = "error";
+})(MissingVarLog || (exports.MissingVarLog = MissingVarLog = {}));
+
+
+/***/ }),
+
 /***/ 5287:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8757,11 +8805,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.replaceTokens = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 const replace_in_file_1 = __nccwpck_require__(5983);
-function replaceTokens(tokenPrefix, tokenSuffix, files) {
+const missingVarLog_1 = __nccwpck_require__(1367);
+function replaceTokens(tokenPrefix, tokenSuffix, files, missingVarDefault, missingVarLog, additionalVariables) {
     return __awaiter(this, void 0, void 0, function* () {
         const fromRegEx = new RegExp(`${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`, "gm");
         const matchRegEx = new RegExp(`${escapeDelimiter(tokenPrefix)}(.+?)${escapeDelimiter(tokenSuffix)}`);
+        const getVariable = (tokenName) => {
+            var _a;
+            return (_a = additionalVariables[tokenName]) !== null && _a !== void 0 ? _a : process.env[tokenName];
+        };
         const result = yield (0, replace_in_file_1.replaceInFile)({
             files,
             allowEmptyPaths: true,
@@ -8770,9 +8824,18 @@ function replaceTokens(tokenPrefix, tokenSuffix, files) {
                 const m = match.match(matchRegEx);
                 if (m) {
                     const tokenName = m[1];
-                    return process.env[tokenName] || "";
+                    const value = getVariable(tokenName);
+                    if (!!value) {
+                        return value;
+                    }
+                    if (missingVarLog === missingVarLog_1.MissingVarLog.Error) {
+                        core.error(`Variable not found: ${tokenName}`);
+                    }
+                    else if (missingVarLog == missingVarLog_1.MissingVarLog.Warn) {
+                        core.warning(`Variable not found: ${tokenName}`);
+                    }
                 }
-                return "";
+                return missingVarDefault;
             }
         });
         return result.filter(r => r.hasChanged).map(r => r.file);
